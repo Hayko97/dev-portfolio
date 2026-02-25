@@ -207,12 +207,14 @@ const experience = [
 ]
 
 const activeSection = ref('hero')
-const navItems = [
-    {id: 'hero', label: 'Hello', number: '01'},
-    {id: 'skills', label: 'Expertise', number: '02'},
-    {id: 'projects', label: 'Portfolio', number: '03'},
-    {id: 'experience', label: 'Career', number: '04'},
-    {id: 'contact', label: 'Contact', number: '05'},
+
+type NavItem = { id: string; label: string; number: string }
+const navItems: NavItem[] = [
+    { id: 'hero', label: 'Hello', number: '01' },
+    { id: 'skills', label: 'Expertise', number: '02' },
+    { id: 'projects', label: 'Portfolio', number: '03' },
+    { id: 'experience', label: 'Career', number: '04' },
+    { id: 'contact', label: 'Contact', number: '05' },
 ]
 
 const sidebarOpen = ref(false)
@@ -336,12 +338,12 @@ onUnmounted(() => {
 // Contact form moved into a separate component: ContactForm.vue
 
 const currentSectionInfo = computed(() => {
-    const section = navItems.find(item => item.id === activeSection.value)
     const index = navItems.findIndex(item => item.id === activeSection.value)
+    const section = navItems[index] ?? navItems[0]
     return {
         ...section,
-        index: index + 1,
-        total: navItems.length
+        index: index >= 0 ? index + 1 : 1,
+        total: navItems.length,
     }
 })
 </script>
