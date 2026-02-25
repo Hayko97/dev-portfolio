@@ -2,6 +2,7 @@
 import {Head, Link} from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import {ref, onMounted, onUnmounted, computed} from 'vue'
+import ContactForm from '@/Components/ContactForm.vue'
 
 const socials = [
     {
@@ -332,16 +333,7 @@ onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll)
 })
 
-// Contact form
-const contactForm = ref({
-    name: '',
-    email: '',
-    message: '',
-})
-
-const submitContact = () => {
-    console.log('[v0] Contact form submitted:', contactForm.value)
-}
+// Contact form moved into a separate component: ContactForm.vue
 
 const currentSectionInfo = computed(() => {
     const section = navItems.find(item => item.id === activeSection.value)
@@ -858,62 +850,7 @@ const currentSectionInfo = computed(() => {
 
                         <div class="grid lg:grid-cols-2 gap-8">
                             <!-- Contact form -->
-                            <div class="rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden">
-                                <form @submit.prevent="submitContact" class="p-8 space-y-6">
-                                    <div>
-                                        <label for="name" class="block text-sm font-semibold text-gray-900 mb-2"
-                                               style="font-family: 'SF Mono', Monaco, Menlo, monospace;">Name</label>
-                                        <input
-                                            id="name"
-                                            v-model="contactForm.name"
-                                            type="text"
-                                            required
-                                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[var(--color-secondary)] focus:ring-2 focus:ring-[rgb(var(--yellow-rgb)/0.2)] outline-none transition-all"
-                                            placeholder="Your name"
-                                        />
-                                        <!-- Changed focus border to yellow, increased border radius to rounded-xl -->
-                                    </div>
-
-                                    <div>
-                                        <label for="email" class="block text-sm font-semibold text-gray-900 mb-2"
-                                               style="font-family: 'SF Mono', Monaco, Menlo, monospace;">Email</label>
-                                        <input
-                                            id="email"
-                                            v-model="contactForm.email"
-                                            type="email"
-                                            required
-                                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[var(--color-secondary)] focus:ring-2 focus:ring-[rgb(var(--yellow-rgb)/0.2)] outline-none transition-all"
-                                            placeholder="your@email.com"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label for="message" class="block text-sm font-semibold text-gray-900 mb-2"
-                                               style="font-family: 'SF Mono', Monaco, Menlo, monospace;">Message</label>
-                                        <textarea
-                                            id="message"
-                                            v-model="contactForm.message"
-                                            required
-                                            rows="5"
-                                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[var(--color-secondary)] focus:ring-2 focus:ring-[rgb(var(--yellow-rgb)/0.2)] outline-none transition-all resize-none"
-                                            placeholder="Tell me about your project..."
-                                        ></textarea>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-secondary)] px-6 py-4 text-base font-semibold text-gray-900 shadow-lg shadow-[rgb(var(--yellow-rgb)/0.3)] hover:bg-[var(--color-secondary-300)] transition-all duration-300 hover:scale-105"
-                                        style="font-family: 'SF Mono', Monaco, Menlo, monospace;"
-                                    >
-                                        <!-- Changed submit button to yellow gradient -->
-                                        Send message
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                        </svg>
-                                    </button>
-                                </form>
-                            </div>
+                            <ContactForm />
 
                             <!-- Contact info cards -->
                             <div class="space-y-6">
