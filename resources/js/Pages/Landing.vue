@@ -819,7 +819,8 @@ const currentSectionInfo = computed(() => {
                                     No commitment required — just a friendly conversation about your vision.
                                 </p>
                                 <div class="mt-10 flex flex-wrap gap-4">
-                                    <a href="#contact"
+                                    <a href="https://calendly.com/hharutyunyan97/interview"
+                                       target="_blank"
                                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 py-4 text-base font-semibold text-white-900 shadow-lg shadow-[rgb(var(--blue-rgb)/0.3)] hover:shadow-[rgb(var(--blue-rgb)/0.5)] transition-all duration-300 hover:scale-105"
                                        style="font-family: 'SF Mono', Monaco, Menlo, monospace;">
                                         Book now
