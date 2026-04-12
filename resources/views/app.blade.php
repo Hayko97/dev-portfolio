@@ -35,8 +35,8 @@
         <meta property="og:url" content="{{ request()->url() }}">
         <meta property="og:title" content="{{ $appName }} | Software Engineer & Full‑Stack Developer">
         <meta property="og:description" content="{{ $defaultDescription }}">
-        @if (file_exists(public_path('og-image.jpg')))
-            <meta property="og:image" content="{{ asset('og-image.jpg') }}">
+        @if (file_exists(public_path('me.jpg')))
+            <meta property="og:image" content="{{ asset('me.jpg') }}">
             <meta property="og:image:alt" content="{{ $appName }} — Portfolio">
         @endif
 
@@ -44,8 +44,8 @@
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ $appName }} | Software Engineer & Full‑Stack Developer">
         <meta name="twitter:description" content="{{ $defaultDescription }}">
-        @if (file_exists(public_path('og-image.jpg')))
-            <meta name="twitter:image" content="{{ asset('og-image.jpg') }}">
+        @if (file_exists(public_path('me.jpg')))
+            <meta name="twitter:image" content="{{ asset('me.jpg') }}">
         @endif
 
         <!-- Language & Alternates -->

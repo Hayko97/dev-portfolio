@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" xmlns:src="http://www.w3.org/1999/xhtml">
 import {Head, Link} from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import {ref, onMounted, onUnmounted, computed} from 'vue'
@@ -441,9 +441,9 @@ const currentSectionInfo = computed(() => {
                         <div
                             :class="['transition-all duration-1000 delay-300', heroVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8']">
                             <div
-                                class="relative aspect-square max-w-[800px] w-full mx-auto bg-gray-50 rounded-xl overflow-hidden">
+                                class="relative aspect-square max-w-[800px] w-full mx-auto rounded-xl overflow-hidden">
                                 <img
-                                    src:='/me.jpg'
+                                    :src='"/me.png"'
                                     alt="Hayk Harutyunyan"
                                     class="w-full h-full object-cover"
                                 />
