@@ -219,44 +219,6 @@ const navItems: NavItem[] = [
 
 const sidebarOpen = ref(false)
 
-// Hero video controls
-const heroVideoEl = ref<HTMLVideoElement | null>(null)
-const isHeroVideoPlaying = ref(false)
-
-async function playHeroVideo() {
-    const el = heroVideoEl.value
-    if (!el) return
-    try {
-        await el.play()
-    } catch (err) {
-        console.warn('Video play failed:', err)
-        try {
-            el.load()
-            await el.play()
-        } catch (e2) {
-            console.warn('Retry play failed:', e2)
-        }
-    }
-}
-
-function pauseHeroVideo() {
-    const el = heroVideoEl.value
-    if (!el) return
-    el.pause()
-}
-
-function onHeroVideoPlay() {
-    isHeroVideoPlaying.value = true
-}
-
-function onHeroVideoPause() {
-    isHeroVideoPlaying.value = false
-}
-
-function onHeroVideoEnded() {
-    isHeroVideoPlaying.value = false
-}
-
 // Scroll spy
 const handleScroll = () => {
     const sections = navItems.map(item => item.id)
@@ -475,44 +437,16 @@ const currentSectionInfo = computed(() => {
                             </div>
                         </div>
 
-                        <!-- Video -->
+                        <!-- Photo -->
                         <div
                             :class="['transition-all duration-1000 delay-300', heroVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8']">
                             <div
                                 class="relative aspect-square max-w-[800px] w-full mx-auto bg-gray-50 rounded-xl overflow-hidden">
-                                <button
-                                    v-if="!isHeroVideoPlaying"
-                                    @click="playHeroVideo"
-                                    type="button"
-                                    class="absolute inset-0 m-auto w-20 h-20 flex items-center justify-center rounded-full text-white hover:scale-110 transition transform focus:outline-none cursor-pointer z-10 shadow-lg"
-                                    aria-label="Play video"
-                                >
-                                    <svg class="w-10 h-10 ml-1" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M8 5v14l11-7z"/>
-                                    </svg>
-                                </button>
-                                <button
-                                    v-else
-                                    @click="pauseHeroVideo"
-                                    type="button"
-                                    class="absolute inset-0 m-auto w-20 h-20 flex items-center justify-center rounded-full text-white hover:scale-110 transition transform focus:outline-none cursor-pointer z-10 shadow-lg"
-                                    aria-label="Pause video"
-                                >
-                                    <svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
-                                    </svg>
-                                </button>
-
-                                <video
-                                    ref="heroVideoEl"
-                                    class="w-full h-full object-contain"
-                                    :src='"/video/hayk.mp4"'
-                                    playsinline
-                                    preload="metadata"
-                                    @play="onHeroVideoPlay"
-                                    @pause="onHeroVideoPause"
-                                    @ended="onHeroVideoEnded"
-                                ></video>
+                                <img
+                                    src:='/me.jpg'
+                                    alt="Hayk Harutyunyan"
+                                    class="w-full h-full object-cover"
+                                />
                             </div>
                         </div>
 
