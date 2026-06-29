@@ -217,6 +217,8 @@ const navItems: NavItem[] = [
     { id: 'contact', label: 'Contact', number: '05' },
 ]
 
+const revealableSectionIds = ['skills', 'projects', 'experience'] as const
+
 const sidebarOpen = ref(false)
 
 // Scroll spy
@@ -231,11 +233,14 @@ const handleScroll = () => {
             break
         }
     }
+
+    revealVisibleSections()
 }
 
 const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
     if (element) {
+        revealSection(sectionId)
         element.scrollIntoView({behavior: 'smooth', block: 'start'})
         sidebarOpen.value = false
     }
@@ -246,6 +251,36 @@ const heroVisible = ref(false)
 const skillsVisible = ref(false)
 const projectsVisible = ref(false)
 const experienceVisible = ref(false)
+const compactMotion = ref(false)
+
+let sectionObserver: IntersectionObserver | null = null
+let revealFallbackId: number | null = null
+
+const revealSection = (sectionId: string) => {
+    if (sectionId === 'skills') skillsVisible.value = true
+    if (sectionId === 'projects') projectsVisible.value = true
+    if (sectionId === 'experience') experienceVisible.value = true
+}
+
+const revealAllSections = () => {
+    revealableSectionIds.forEach(revealSection)
+}
+
+const revealVisibleSections = () => {
+    const revealLine = window.innerHeight * (compactMotion.value ? 1.8 : 1.45)
+
+    revealableSectionIds.forEach((sectionId) => {
+        const section = document.getElementById(sectionId)
+
+        if (section && section.getBoundingClientRect().top <= revealLine) {
+            revealSection(sectionId)
+        }
+    })
+}
+
+const revealDelayStyle = (index: number, step: number) => ({
+    transitionDelay: compactMotion.value ? '0ms' : `${Math.min(index * step, 240)}ms`,
+})
 
 // Typing effect
 const typedText = ref('')
@@ -261,40 +296,53 @@ const typeWriter = () => {
 }
 
 onMounted(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    compactMotion.value = prefersReducedMotion || window.matchMedia('(max-width: 767px)').matches
+
     window.addEventListener('scroll', handleScroll)
     handleScroll()
 
     setTimeout(typeWriter, 500)
 
-    setTimeout(() => {
+    requestAnimationFrame(() => {
         heroVisible.value = true
-    }, 100)
+        revealVisibleSections()
+    })
 
-    const observerOptions = {
-        threshold: 0.2,
-        rootMargin: '0px 0px -100px 0px'
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+        revealAllSections()
+        return
     }
 
-    const observer = new IntersectionObserver((entries) => {
+    const observerOptions = {
+        threshold: 0.01,
+        rootMargin: compactMotion.value ? '0px 0px 75% 0px' : '0px 0px 45% 0px',
+    }
+
+    sectionObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const sectionId = entry.target.id
-                if (sectionId === 'skills') skillsVisible.value = true
-                if (sectionId === 'projects') projectsVisible.value = true
-                if (sectionId === 'experience') experienceVisible.value = true
+                revealSection(entry.target.id)
+                sectionObserver?.unobserve(entry.target)
             }
         })
     }, observerOptions)
 
-    const sections = ['skills', 'projects', 'experience']
-    sections.forEach(id => {
+    revealableSectionIds.forEach(id => {
         const element = document.getElementById(id)
-        if (element) observer.observe(element)
+        if (element) sectionObserver?.observe(element)
     })
+
+    revealFallbackId = window.setTimeout(revealAllSections, compactMotion.value ? 300 : 700)
 })
 
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll)
+    sectionObserver?.disconnect()
+
+    if (revealFallbackId !== null) {
+        window.clearTimeout(revealFallbackId)
+    }
 })
 
 // Contact form moved into a separate component: ContactForm.vue
@@ -389,11 +437,11 @@ const currentSectionInfo = computed(() => {
                 <div
                     class="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:2rem_2rem] opacity-40"/>
 
-                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 w-full">
                     <div class="grid lg:grid-cols-2 gap-12 items-start">
                         <!-- Headline -->
                         <div
-                            :class="['transition-all duration-1000 lg:col-span-2', heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8']">
+                            :class="['transition-all duration-500 lg:col-span-2', heroVisible ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-4']">
                             <!-- CHANGED: Removed code tags, added minimal terminal prompt -->
                             <div class="flex items-center gap-2 text-xs font-mono text-gray-400 mb-4">
                                 <span class="text-[var(--color-important)]">$</span>
@@ -411,7 +459,7 @@ const currentSectionInfo = computed(() => {
 
                         <!-- Overview text -->
                         <div
-                            :class="['transition-all duration-1000', heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8']">
+                            :class="['transition-all duration-500', heroVisible ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-4']">
                             <div class="space-y-6 text-lg leading-relaxed text-gray-700">
                                 <!-- CHANGED: Added minimal line numbers, removed excessive code tags -->
                                 <p class="flex gap-3">
@@ -439,7 +487,7 @@ const currentSectionInfo = computed(() => {
 
                         <!-- Photo -->
                         <div
-                            :class="['transition-all duration-1000 delay-300', heroVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8']">
+                            :class="['transition-all duration-500 delay-100', heroVisible ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-4']">
                             <div
                                 class="relative aspect-square max-w-[800px] w-full mx-auto rounded-xl overflow-hidden">
                                 <img
@@ -452,7 +500,7 @@ const currentSectionInfo = computed(() => {
 
                         <!-- Action buttons -->
                         <div
-                            :class="['transition-all duration-1000 lg:col-span-2', heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8']">
+                            :class="['transition-all duration-500 lg:col-span-2', heroVisible ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-4']">
                             <div class="mt-10 flex flex-wrap items-center gap-4">
                                 <button
                                     @click="scrollToSection('projects')"
@@ -483,10 +531,10 @@ const currentSectionInfo = computed(() => {
 
             <!-- Light skills section with electric colors -->
             <section id="skills" class="relative bg-gray-50">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
                     <div
-                        :class="['transition-all duration-1000', skillsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8']">
-                        <div class="text-center mb-16">
+                        :class="['transition-all duration-300', skillsVisible ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-4']">
+                        <div class="text-center mb-12 sm:mb-16">
                             <!-- CHANGED: Removed code tags, kept minimal terminal prompt -->
                             <div class="flex items-center justify-center gap-2 text-xs font-mono text-gray-400 mb-3">
                                 <span class="text-[var(--color-important)]">$</span>
@@ -500,8 +548,8 @@ const currentSectionInfo = computed(() => {
                             <div
                                 v-for="(skill, index) in skills"
                                 :key="skill.name"
-                                :class="['group relative rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-xl overflow-hidden transition-all duration-500 hover:-translate-y-2', skillsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8']"
-                                :style="{ transitionDelay: `${index * 50}ms` }"
+                                :class="['group relative rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-2', skillsVisible ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-4']"
+                                :style="revealDelayStyle(index, 20)"
                             >
                                 <div class="p-6">
                                     <!-- CHANGED: Kept comment style for category -->
@@ -524,10 +572,10 @@ const currentSectionInfo = computed(() => {
 
             <!-- Light projects section with macOS window style -->
             <section id="projects" class="relative bg-white">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
                     <div
-                        :class="['transition-all duration-1000', projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8']">
-                        <div class="flex items-end justify-between mb-16">
+                        :class="['transition-all duration-300', projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-4']">
+                        <div class="flex items-end justify-between mb-12 sm:mb-16">
                             <div>
                                 <!-- CHANGED: Simplified terminal command, removed code tags -->
                                 <div class="flex items-center gap-2 text-xs font-mono text-gray-400 mb-3">
@@ -543,8 +591,8 @@ const currentSectionInfo = computed(() => {
                             <article
                                 v-for="(project, index) in projects"
                                 :key="project.title"
-                                :class="['group relative rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-xl overflow-hidden transition-all duration-500 hover:-translate-y-2', projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8']"
-                                :style="{ transitionDelay: `${index * 100}ms` }"
+                                :class="['group relative rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-2', projectsVisible ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-4']"
+                                :style="revealDelayStyle(index, 60)"
                             >
                                 <!-- macOS window header with traffic lights -->
                                 <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 border-b border-gray-200">
@@ -666,10 +714,10 @@ const currentSectionInfo = computed(() => {
 
             <!-- Light experience section -->
             <section id="experience" class="relative bg-gray-50">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
                     <div
-                        :class="['transition-all duration-1000', experienceVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8']">
-                        <div class="text-center mb-16">
+                        :class="['transition-all duration-300', experienceVisible ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-4']">
+                        <div class="text-center mb-12 sm:mb-16">
                             <!-- CHANGED: Simplified terminal command, removed code tags -->
                             <div class="flex items-center justify-center gap-2 text-xs font-mono text-gray-400 mb-3">
                                 <span class="text-[var(--color-important)]">$</span>
@@ -688,8 +736,8 @@ const currentSectionInfo = computed(() => {
                                     <div
                                         v-for="(exp, index) in experience"
                                         :key="exp.company"
-                                        :class="['relative pl-10 transition-all duration-700', experienceVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8']"
-                                        :style="{ transitionDelay: `${index * 150}ms` }"
+                                        :class="['relative pl-10 transition-all duration-300', experienceVisible ? 'opacity-100 translate-x-0' : 'opacity-100 -translate-x-4']"
+                                        :style="revealDelayStyle(index, 80)"
                                     >
                                         <!-- Timeline dot -->
                                         <div
@@ -736,7 +784,7 @@ const currentSectionInfo = computed(() => {
 
             <!-- Light CTA section with electric gradient -->
             <section id="free-consultation" class="relative bg-white">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
                     <div class="relative rounded-2xl bg-white border border-gray-200 overflow-hidden shadow-md">
                         <div class="relative p-10 sm:p-14 lg:p-20">
                             <div class="max-w-3xl">
@@ -772,9 +820,9 @@ const currentSectionInfo = computed(() => {
 
             <!-- Light contact section -->
             <section id="contact" class="relative bg-gray-50">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
                     <div class="max-w-5xl mx-auto">
-                        <div class="text-center mb-16">
+                        <div class="text-center mb-12 sm:mb-16">
                             <!-- CHANGED: Simplified terminal command, removed code tags -->
                             <div class="flex items-center justify-center gap-2 text-xs font-mono text-gray-400 mb-3">
                                 <span class="text-[var(--color-important)]">$</span>
